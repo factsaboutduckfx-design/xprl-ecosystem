@@ -1,5 +1,5 @@
 (() => {
-  const ENDPOINT = "wss://s.altnet.rippletest.net:51233";
+  const ENDPOINT = "wss://xrplcluster.com";
   const $ = (id) => document.getElementById(id);
   let socket, requestId = 0;
   const pending = new Map();
@@ -9,7 +9,7 @@
     try { socket = new WebSocket(ENDPOINT); } catch (e) { setText("connectionState", "Unavailable"); setText("connectionDetail", e.message); return; }
     socket.addEventListener("open", () => {
       setText("connectionState", "Connected");
-      setText("connectionDetail", "Public Testnet WebSocket");
+      setText("connectionDetail", "Public Mainnet WebSocket");
       socket.send(JSON.stringify({id:++requestId,command:"subscribe",streams:["ledger"]}));
     });
     socket.addEventListener("message", (event) => {
@@ -26,7 +26,7 @@
   }
   function rpc(command, params = {}) {
     return new Promise((resolve, reject) => {
-      if (!socket || socket.readyState !== WebSocket.OPEN) return reject(new Error("Not connected to XRPL Testnet. Wait a moment and retry."));
+      if (!socket || socket.readyState !== WebSocket.OPEN) return reject(new Error("Not connected to XRPL Mainnet. Wait a moment and retry."));
       const id = ++requestId, timer = setTimeout(() => { pending.delete(id); reject(new Error("XRPL request timed out.")); }, 12000);
       pending.set(id, {resolve,reject,timer});
       socket.send(JSON.stringify({id,command,...params}));
