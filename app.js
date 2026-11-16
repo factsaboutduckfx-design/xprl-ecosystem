@@ -75,9 +75,10 @@
     show("txResult", "Searching XRPL Mainnet validated history…");
     try {
       const response = await rpc("tx", { transaction: hash, binary: false });
-      const tx = response.result || response;
-      const meta = tx.meta || tx.metaData || {};
-      const validated = tx.validated === true || Boolean(tx.ledger_index && meta.TransactionResult);
+      const rawTx = response.result || response;
+      const tx = rawTx.tx_json || rawTx;
+      const meta = rawTx.meta || tx.meta || rawTx.metaData || tx.metaData || {};
+      const validated = rawTx.validated === true || tx.validated === true || Boolean((rawTx.ledger_index || tx.ledger_index) && meta.TransactionResult);
       const txHash = tx.hash || hash;
       show("txResult",
         "NETWORK: XRPL MAINNET\n" +
@@ -85,7 +86,7 @@
         "Hash: " + txHash + "\n" +
         "Type: " + (tx.TransactionType || "—") + "\n" +
         "Result: " + (meta.TransactionResult || "—") + "\n" +
-        "Ledger: " + (tx.ledger_index || "—") + "\n" +
+        "Ledger: " + (rawTx.ledger_index || tx.ledger_index || "—") + "\n" +
         "Fee: " + (tx.Fee ? (Number(tx.Fee) / 1000000) + " XRP" : "—") + "\n" +
         "Explorer: https://xrpscan.com/tx/" + txHash);
     } catch (error) { show("txResult", error.message); }
